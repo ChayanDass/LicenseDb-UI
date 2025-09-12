@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0-only
 // SPDX-FileCopyrightText: © 2025 Siemens AG
 // SPDX-FileContributor: Sourav Bhowmik <sourav.bhowmik@siemens.com>
+// SPDX-FileContributor: 2025 Chayan Das <01chayandas@gmail.com>
+
 
 import React, { useState, useEffect } from 'react';
 import { Form, Row, Col, Button } from 'react-bootstrap';
@@ -10,9 +12,10 @@ import { useMutation } from '@tanstack/react-query';
 import '../styles/createFormView.css';
 import CustomSelect from '../components/customStyleSelect';
 import { riskOptions } from '../utils/data/dropdownOptions';
-import { postLicense } from '../api/api';
+import { postLicense, fetchSimilarLicenses } from '../api/api';
 import { loadYaml } from '../utils/loadYaml';
 import { resolveComponentPath } from '../utils/componentPathMap';
+import SimilarityResultList from '../components/SimilarityResultList';
 
 function CreateLicense() {
 	const [fields, setFields] = useState([]);
@@ -38,6 +41,7 @@ function CreateLicense() {
 		text_updatable: false,
 	};
 	const [licenseData, setLicenseData] = useState(initialLicenseData);
+	const [similarLicenses, setSimilarLicenses] = useState([]);
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -50,6 +54,25 @@ function CreateLicense() {
 
 		fetchConfig();
 	}, []);
+
+	useEffect(() => {
+		const delayDebounce = setTimeout(() => {
+			if (licenseData.text) {
+				fetchSimilarLicenses(licenseData.text)
+					.then((res) => {
+						setSimilarLicenses(res.data);
+					})
+					.catch((err) => {
+						setSimilarLicenses([]);
+					});
+			} else {
+				setSimilarLicenses([]);
+			}
+		}, 500); // debounce time
+
+		return () => clearTimeout(delayDebounce);
+	}, [licenseData.text]);
+
 
 	const handleChange = e => {
 		if (e && e.target) {
@@ -150,7 +173,7 @@ function CreateLicense() {
 								checked={
 									componentType === 'checkbox'
 										? licenseData.external_ref[name] ||
-											false
+										false
 										: undefined
 								}
 								onChange={handleChangeExt}
@@ -345,7 +368,17 @@ function CreateLicense() {
 								required
 							/>
 						</Form.Group>
+						{licenseData.text && (
+							<SimilarityResultList
+								list={similarLicenses}
+								header="License"
+								text={licenseData.text}
+							/>
+						)}
+
 					</Col>
+
+
 				</Row>
 
 				<Button variant="outline-success" type="submit">

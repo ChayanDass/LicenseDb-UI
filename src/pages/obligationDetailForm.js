@@ -26,7 +26,9 @@ import {
 	fetchObligationTypes,
 	fetchObligationClassfications,
 	updateObligationWithLicenses,
+	fetchSimilarObligations
 } from '../api/api';
+import SimilarityResultList from '../components/SimilarityResultList';
 
 function ObligationDetailForm({
 	obligationPayload,
@@ -36,6 +38,29 @@ function ObligationDetailForm({
 	sortOrder,
 }) {
 	const queryClient = useQueryClient();
+	const [similarObligations, setSimilarObligations] = useState([]);
+	useEffect(() => {
+		const delayDebounce = setTimeout(() => {
+			if (obligationPayload.text) {
+				fetchSimilarObligations(obligationPayload.text)
+
+					.then((res) => {
+						let filtered = res.data || [];
+						filtered = filtered.filter(
+							(item) => item.topic !== obligationPayload.topic
+						);
+						setSimilarObligations(filtered);
+					})
+					.catch((err) => {
+						setSimilarObligations([]);
+					});
+			} else {
+				setSimilarObligations([]);
+			}
+		}, 500); // debounce time
+
+		return () => clearTimeout(delayDebounce);
+	}, [obligationPayload.text]);
 
 	const { data: obligationTypes } = useQuery({
 		queryKey: ['obligations', 'type'],
@@ -76,6 +101,7 @@ function ObligationDetailForm({
 		label: item.classification,
 		color: item.color,
 	}));
+
 
 	const mutation = useMutation({
 		mutationFn: updateObligation,
@@ -339,6 +365,14 @@ function ObligationDetailForm({
 										onChange={handleInputChange}
 									/>
 								</Form.Group>
+								{obligationPayload.text && (
+									<SimilarityResultList
+										list={similarObligations}
+										header="Obligation"
+										text={obligationPayload.text}
+										label={obligationPayload.topic}
+									/>
+								)}
 							</Col>
 						</Row>
 					</Col>
