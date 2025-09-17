@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0-only
 // SPDX-FileCopyrightText: © 2025 Siemens AG
 // SPDX-FileContributor: Sourav Bhowmik <sourav.bhowmik@siemens.com>
+// SPDX-FileContributor: 2025 Chayan Das <01chayandas@gmail.com>
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Form, Row, Col, Button } from 'react-bootstrap';
 import '../styles/createFormView.css';
 import Select from 'react-select';
@@ -11,11 +12,14 @@ import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import CustomSelect from '../components/customStyleSelect';
 import { categoryOptions } from '../utils/data/dropdownOptions';
+import SimilarityResultList from '../components/SimilarityResultList';
+
 import {
 	postObligation,
 	fetchObligationTypes,
 	fetchObligationClassfications,
 	fetchLicensePreviews,
+	fetchSimilarObligations
 } from '../api/api';
 
 function CreateObligation() {
@@ -66,8 +70,26 @@ function CreateObligation() {
 	};
 
 	const [obligationData, setObligationData] = useState(initialObligationData);
-
+	const [similarObligations, setSimilarObligations] = useState([]);
 	const [selectedValues, setSelectedValues] = useState([]);
+	useEffect(() => {
+		const delayDebounce = setTimeout(() => {
+			if (obligationData.text) {
+				fetchSimilarObligations(obligationData.text)
+					.then((res) => {
+						setSimilarObligations(res.data);
+					})
+					.catch((err) => {
+						setSimilarObligations([]);
+					});
+			} else {
+				setSimilarObligations([]);
+			}
+		}, 500); // debounce time
+
+		return () => clearTimeout(delayDebounce);
+	}, [obligationData.text]);
+
 	const handleChange = e => {
 		if (e && e.target) {
 			const { name, value, type, checked } = e.target;
@@ -290,6 +312,13 @@ function CreateObligation() {
 								required
 							/>
 						</Form.Group>
+						{obligationData.text && (
+							<SimilarityResultList
+								list={similarObligations}
+								header="Obligation"
+								text={obligationData.text}
+							/>
+						)}
 					</Col>
 				</Row>
 

@@ -16,11 +16,13 @@ import { riskOptions } from '../utils/data/dropdownOptions';
 import ToolTipLegend from './tooltip/tooltipLegend';
 import ToolTipLabel from './tooltip/tooltipLabel';
 import { tooltipLicense } from './tooltip/tooltips';
+import SimilarityResultList from '../components/SimilarityResultList';
 import {
 	fetchObligationPreviews,
 	updateLicense,
 	fetchObligationsOfLicense,
 	updateObligationsOfLicense,
+	fetchSimilarLicenses
 } from '../api/api';
 import 'react-toastify/dist/ReactToastify.css';
 import { loadYaml } from '../utils/loadYaml';
@@ -38,6 +40,7 @@ function LicenseDetailForm({
 	const [finalObligations, setFinalObligations] = useState([]);
 	const queryClient = useQueryClient();
 	const [fields, setFields] = useState([]);
+	const [similarLicenses, setSimilarLicenses] = useState([]);
 
 	useEffect(() => {
 		const fetchConfig = async () => {
@@ -59,6 +62,28 @@ function LicenseDetailForm({
 		queryKey: ['obligations', 'preview'],
 		queryFn: () => fetchObligationPreviews(),
 	});
+
+	useEffect(() => {
+		const delayDebounce = setTimeout(() => {
+			if (licensePayload.text) {
+				fetchSimilarLicenses(licensePayload.text)
+					.then((res) => {
+						let filtered = res.data || [];
+						filtered = filtered.filter(
+							(item) => item.shortname !== licensePayload.shortname
+						);
+						setSimilarLicenses(filtered);
+					})
+					.catch((err) => {
+						setSimilarLicenses([]);
+					});
+			} else {
+				setSimilarLicenses([]);
+			}
+		}, 500); // debounce time
+
+		return () => clearTimeout(delayDebounce);
+	}, [licensePayload.text]);
 
 	if (isObligationListFetchError) {
 		toast.error(
@@ -102,6 +127,7 @@ function LicenseDetailForm({
 			},
 		);
 	}
+
 
 	const updateLicenseMutation = useMutation({
 		mutationFn: updateLicense,
@@ -188,6 +214,7 @@ function LicenseDetailForm({
 			[name]: value,
 		});
 	};
+
 
 	const handleChangeExt = e => {
 		if (e && e.target) {
@@ -530,6 +557,14 @@ function LicenseDetailForm({
 								onChange={handleInputChange}
 							/>
 						</Form.Group>
+						{licensePayload.text && (
+							<SimilarityResultList
+								list={similarLicenses}
+								header="License"
+								text={licensePayload.text}
+								label={licensePayload.shortname}
+							/>
+						)}
 					</Col>
 				</Row>
 
@@ -557,11 +592,11 @@ function LicenseDetailForm({
 					>
 						{(updateLicenseMutation.isPending ||
 							updateLicenseObligationsMutation.isPending) && (
-							<span
-								className="spinner-border spinner-border-sm me-1"
-								role="status"
-							></span>
-						)}
+								<span
+									className="spinner-border spinner-border-sm me-1"
+									role="status"
+								></span>
+							)}
 						Update License
 					</button>
 				</div>
