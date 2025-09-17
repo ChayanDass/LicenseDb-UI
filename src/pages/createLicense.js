@@ -3,7 +3,6 @@
 // SPDX-FileContributor: Sourav Bhowmik <sourav.bhowmik@siemens.com>
 // SPDX-FileContributor: 2025 Chayan Das <01chayandas@gmail.com>
 
-
 import React, { useState, useEffect } from 'react';
 import { Form, Row, Col, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
@@ -59,10 +58,10 @@ function CreateLicense() {
 		const delayDebounce = setTimeout(() => {
 			if (licenseData.text) {
 				fetchSimilarLicenses(licenseData.text)
-					.then((res) => {
+					.then(res => {
 						setSimilarLicenses(res.data);
 					})
-					.catch((err) => {
+					.catch(err => {
 						setSimilarLicenses([]);
 					});
 			} else {
@@ -72,7 +71,6 @@ function CreateLicense() {
 
 		return () => clearTimeout(delayDebounce);
 	}, [licenseData.text]);
-
 
 	const handleChange = e => {
 		if (e && e.target) {
@@ -173,7 +171,7 @@ function CreateLicense() {
 								checked={
 									componentType === 'checkbox'
 										? licenseData.external_ref[name] ||
-										false
+											false
 										: undefined
 								}
 								onChange={handleChangeExt}
@@ -375,10 +373,7 @@ function CreateLicense() {
 								text={licenseData.text}
 							/>
 						)}
-
 					</Col>
-
-
 				</Row>
 
 				<Button variant="outline-success" type="submit">

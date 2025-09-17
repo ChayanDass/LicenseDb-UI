@@ -26,7 +26,7 @@ import {
 	fetchObligationTypes,
 	fetchObligationClassfications,
 	updateObligationWithLicenses,
-	fetchSimilarObligations
+	fetchSimilarObligations,
 } from '../api/api';
 import SimilarityResultList from '../components/SimilarityResultList';
 
@@ -43,15 +43,14 @@ function ObligationDetailForm({
 		const delayDebounce = setTimeout(() => {
 			if (obligationPayload.text) {
 				fetchSimilarObligations(obligationPayload.text)
-
-					.then((res) => {
+					.then(res => {
 						let filtered = res.data || [];
 						filtered = filtered.filter(
-							(item) => item.topic !== obligationPayload.topic
+							item => item.topic !== obligationPayload.topic,
 						);
 						setSimilarObligations(filtered);
 					})
-					.catch((err) => {
+					.catch(err => {
 						setSimilarObligations([]);
 					});
 			} else {
@@ -60,7 +59,7 @@ function ObligationDetailForm({
 		}, 500); // debounce time
 
 		return () => clearTimeout(delayDebounce);
-	}, [obligationPayload.text]);
+	}, [obligationPayload.text, obligationPayload.topic]);
 
 	const { data: obligationTypes } = useQuery({
 		queryKey: ['obligations', 'type'],
@@ -101,7 +100,6 @@ function ObligationDetailForm({
 		label: item.classification,
 		color: item.color,
 	}));
-
 
 	const mutation = useMutation({
 		mutationFn: updateObligation,

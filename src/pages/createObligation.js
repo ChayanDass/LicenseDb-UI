@@ -19,7 +19,7 @@ import {
 	fetchObligationTypes,
 	fetchObligationClassfications,
 	fetchLicensePreviews,
-	fetchSimilarObligations
+	fetchSimilarObligations,
 } from '../api/api';
 
 function CreateObligation() {
@@ -76,10 +76,10 @@ function CreateObligation() {
 		const delayDebounce = setTimeout(() => {
 			if (obligationData.text) {
 				fetchSimilarObligations(obligationData.text)
-					.then((res) => {
+					.then(res => {
 						setSimilarObligations(res.data);
 					})
-					.catch((err) => {
+					.catch(err => {
 						setSimilarObligations([]);
 					});
 			} else {
