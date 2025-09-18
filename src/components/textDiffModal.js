@@ -8,14 +8,26 @@ import PropTypes from 'prop-types';
 import { Modal, Button } from 'react-bootstrap';
 import DiffViewer, { DiffMethod } from 'react-diff-viewer-continued';
 
-const TextDiffModal = ({ show, handleClose, title, label1, label2, oldText, newText }) => {
+const TextDiffModal = ({
+	show,
+	handleClose,
+	title,
+	label1,
+	label2,
+	oldText,
+	newText,
+}) => {
 	return (
 		<Modal show={show} onHide={handleClose} size="lg" centered>
 			<Modal.Header closeButton>
 				<Modal.Title>
 					<b>{title}</b>
-					{label1 && <span className="ms-2 text-muted">{label1}</span>}
-					{label2 && <span className="ms-2 text-muted">vs {label2}</span>}
+					{label1 && (
+						<span className="ms-2 text-muted">{label1}</span>
+					)}
+					{label2 && (
+						<span className="ms-2 text-muted">vs {label2}</span>
+					)}
 				</Modal.Title>
 			</Modal.Header>
 

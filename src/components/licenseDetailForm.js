@@ -22,7 +22,7 @@ import {
 	updateLicense,
 	fetchObligationsOfLicense,
 	updateObligationsOfLicense,
-	fetchSimilarLicenses
+	fetchSimilarLicenses,
 } from '../api/api';
 import 'react-toastify/dist/ReactToastify.css';
 import { loadYaml } from '../utils/loadYaml';
@@ -67,14 +67,14 @@ function LicenseDetailForm({
 		const delayDebounce = setTimeout(() => {
 			if (licensePayload.text) {
 				fetchSimilarLicenses(licensePayload.text)
-					.then((res) => {
+					.then(res => {
 						let filtered = res.data || [];
 						filtered = filtered.filter(
-							(item) => item.shortname !== licensePayload.shortname
+							item => item.shortname !== licensePayload.shortname,
 						);
 						setSimilarLicenses(filtered);
 					})
-					.catch((err) => {
+					.catch(err => {
 						setSimilarLicenses([]);
 					});
 			} else {
@@ -83,7 +83,7 @@ function LicenseDetailForm({
 		}, 500); // debounce time
 
 		return () => clearTimeout(delayDebounce);
-	}, [licensePayload.text]);
+	}, [licensePayload.text, licensePayload.shortname]);
 
 	if (isObligationListFetchError) {
 		toast.error(
@@ -127,7 +127,6 @@ function LicenseDetailForm({
 			},
 		);
 	}
-
 
 	const updateLicenseMutation = useMutation({
 		mutationFn: updateLicense,
@@ -214,7 +213,6 @@ function LicenseDetailForm({
 			[name]: value,
 		});
 	};
-
 
 	const handleChangeExt = e => {
 		if (e && e.target) {
@@ -592,11 +590,11 @@ function LicenseDetailForm({
 					>
 						{(updateLicenseMutation.isPending ||
 							updateLicenseObligationsMutation.isPending) && (
-								<span
-									className="spinner-border spinner-border-sm me-1"
-									role="status"
-								></span>
-							)}
+							<span
+								className="spinner-border spinner-border-sm me-1"
+								role="status"
+							></span>
+						)}
 						Update License
 					</button>
 				</div>

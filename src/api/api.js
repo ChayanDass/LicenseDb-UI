@@ -488,8 +488,7 @@ export const fetchApiAuthSettings = async () => {
 	return response.data;
 };
 
-
-export const fetchSimilarObligations = async (text) => {
+export const fetchSimilarObligations = async text => {
 	const url = `${process.env.REACT_APP_BASE_URL}/obligations/similarity`;
 	const headers = {};
 
@@ -502,7 +501,7 @@ export const fetchSimilarObligations = async (text) => {
 	return response.data;
 };
 
-export const fetchSimilarLicenses = async (text) => {
+export const fetchSimilarLicenses = async text => {
 	const url = `${process.env.REACT_APP_BASE_URL}/licenses/similarity`;
 	const headers = {};
 
